@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "fchess", "fchess\fchess.fsproj", "{551F15C4-0231-4A67-8976-14044603D226}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{551F15C4-0231-4A67-8976-14044603D226}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{551F15C4-0231-4A67-8976-14044603D226}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{551F15C4-0231-4A67-8976-14044603D226}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{551F15C4-0231-4A67-8976-14044603D226}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
