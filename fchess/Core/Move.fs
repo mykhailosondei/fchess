@@ -12,7 +12,7 @@ type MoveFlag =
     | PromoteToKnight = 5
     | PromoteToRook = 6
     | PromoteToBishop = 7
-    | FirstKingMove = 8
+    | KingMove = 8
     | EnPassant = 9
     | Capture = 16
     | PawnMove = 32
@@ -86,3 +86,7 @@ let coordToIndex (x: int, y: int) =
 let knightMoves =
     [ (-2, -1); (-1, -2); (1, -2); (2, -1)
       (-2, 1);  (-1, 2);  (1, 2);  (2, 1) ]
+    
+let kingMoves =
+    [ (-1, -1); (-1, 1); (1, -1); (1, 1)
+      (-1, 0);  (0, 1);  (1, 0);  (0, -1) ]

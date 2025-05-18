@@ -113,7 +113,7 @@ with
         this.Square[rookFinish] <- this.Square[rookStart]
         this.Square[rookStart] <- Piece.None
         
-        this.CastleRights <- this.CastleRights |> List.where (isColor <| this.ColorToMove)
+        this.CastleRights <- this.CastleRights |> List.where (fun x -> (isColor x <| oppositeColor this.ColorToMove))
         this.EnPassantSquare <- -1
         this.Halfmoves <- this.Halfmoves + 1
         
@@ -124,47 +124,52 @@ with
         
     
     member private this.MakeMove(move : Move) =
+        
+        let mutable endSquarePiece = Piece.None 
+        
         match specialty move.MoveFlag with
         | MoveFlag.PromoteToRook ->
-            assert (this.Square[move.StartSquare] = Piece.Pawn)
-            this.Square[move.EndSquare] <- Piece.Rook
+            assert (getPieceType this.Square[move.StartSquare] = Piece.Pawn)
+            endSquarePiece <- Piece.Rook
         | MoveFlag.PromoteToQueen ->
-            assert (this.Square[move.StartSquare] = Piece.Pawn)
-            this.Square[move.EndSquare] <- Piece.Queen
+            assert (getPieceType this.Square[move.StartSquare] = Piece.Pawn)
+            endSquarePiece <- Piece.Queen
         | MoveFlag.PromoteToKnight ->
-            assert (this.Square[move.StartSquare] = Piece.Pawn)
-            this.Square[move.EndSquare] <- Piece.Knight
+            assert (getPieceType this.Square[move.StartSquare] = Piece.Pawn)
+            endSquarePiece <- Piece.Knight
         | MoveFlag.PromoteToBishop ->
-            assert (this.Square[move.StartSquare] = Piece.Pawn)
-            this.Square[move.EndSquare] <- Piece.Bishop
+            assert (getPieceType this.Square[move.StartSquare] = Piece.Pawn)
+            endSquarePiece <- Piece.Bishop
         | _ ->
-            this.Square[move.EndSquare] <- this.Square[move.StartSquare]
+            endSquarePiece <- this.Square[move.StartSquare]
             
-        this.Square[move.StartSquare] <- Piece.None
         
         if specialty move.MoveFlag = MoveFlag.DoublePawnMove then
-            assert (this.Square[move.StartSquare] = Piece.Pawn)
+            assert (getPieceType this.Square[move.StartSquare] = Piece.Pawn)
             this.EnPassantSquare <- (move.StartSquare + move.EndSquare) / 2
         else this.EnPassantSquare <- -1
             
         
         match specialty move.MoveFlag with
-        | MoveFlag.FirstKingMove ->
-            assert (this.Square[move.StartSquare] = Piece.King)
-            this.CastleRights <- this.CastleRights |> List.where (isColor <| this.ColorToMove)
+        | MoveFlag.KingMove ->
+            assert (getPieceType this.Square[move.StartSquare] = Piece.King)
+            this.CastleRights <- this.CastleRights |> List.where (fun x -> (isColor x <| oppositeColor this.ColorToMove))
         | MoveFlag.QueenRookMove ->
-            assert (this.Square[move.StartSquare] = Piece.Rook)
-            this.CastleRights <- this.CastleRights |> List.where (fun right -> Piece.Queen ||| this.ColorToMove = right)
+            assert (getPieceType this.Square[move.StartSquare] = Piece.Rook)
+            this.CastleRights <- this.CastleRights |> List.where (fun right -> not (Piece.Queen ||| this.ColorToMove = right))
         | MoveFlag.KingRookMove ->
-            assert (this.Square[move.StartSquare] = Piece.Rook)
-            this.CastleRights <- this.CastleRights |> List.where (fun right -> Piece.King ||| this.ColorToMove = right)
+            assert (getPieceType this.Square[move.StartSquare] = Piece.Rook)
+            this.CastleRights <- this.CastleRights |> List.where (fun right -> not (Piece.King |||  this.ColorToMove = right))
         | _ -> ()
         
         if specialty move.MoveFlag = MoveFlag.EnPassant then
             assert (move.EndSquare = this.EnPassantSquare)
-            assert (this.Square[move.StartSquare] = Piece.Pawn)
+            assert (getPieceType this.Square[move.StartSquare] = Piece.Pawn)
             let pawnShift = move.EndSquare % 8 - move.StartSquare % 8
             this.Square[move.StartSquare + pawnShift] <- Piece.None
+            
+        this.Square[move.StartSquare] <- Piece.None
+        this.Square[move.EndSquare] <- endSquarePiece
             
         if breaksRule move.MoveFlag then
             this.Halfmoves <- 0

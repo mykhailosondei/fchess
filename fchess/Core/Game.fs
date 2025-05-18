@@ -4,9 +4,11 @@ open Board
 open fchess.Core.Move
 open fchess.Core.Piece
 
-type Game = { Board : Board; mutable moves : Move list} with
+
+
+type Game = { Board : Board; mutable moves : Move list; mutable castles : Castle list} with
     member this.GenerateMoves() =
-        this.moves <- []
+        let mutable moves : Move list = []
         
         for square = 0 to 63 do
             let piece = this.Board.Square[square]
@@ -15,15 +17,17 @@ type Game = { Board : Board; mutable moves : Move list} with
             | piece when isColor piece this.Board.ColorToMove ->
                 match piece with
                 | piece when isSliding piece ->
-                    this.GenerateSlidingMoves(square, piece)
+                    moves <- this.GenerateSlidingMoves(square, piece) |> List.append moves
                 | piece when getPieceType piece = Piece.Knight ->
-                    this.GenerateKnightMoves(square)
+                    moves <- this.GenerateKnightMoves(square) |> List.append moves
                 | piece when getPieceType piece = Piece.Pawn ->
-                    this.GeneratePawnMoves(square)
+                    moves <- this.GeneratePawnMoves(square) |> List.append moves
+                | piece when getPieceType piece = Piece.King ->
+                    moves <- this.GenerateKingMoves(square) |> List.append moves
                 | _ -> ()
             | _ -> ()
             
-        this.moves
+        moves
         
     member private this.DetermineFlag(startSquare, endSquare, pieceType) =
         let mutable result = MoveFlag.None
@@ -45,14 +49,16 @@ type Game = { Board : Board; mutable moves : Move list} with
                 | _ -> ()
             | _ -> ()
         | Piece.Knight -> ()
+        | Piece.King -> result <- result ||| MoveFlag.KingMove
         | Piece.Pawn -> result <- result ||| MoveFlag.PawnMove
         | _ -> ()
         
         result
             
     member this.GenerateSlidingMoves(startSquare, piece) =
+        let mutable moves : Move list = []
         let pieceType = getPieceType piece
-        let startDirection = if Piece.Bishop = pieceType then 3 else 0
+        let startDirection = if Piece.Bishop = pieceType then 4 else 0
         let endDirection = if Piece.Rook = pieceType then 3 else 7
         for direction = startDirection to endDirection do
             let offset = directionOffsets[direction]
@@ -71,7 +77,7 @@ type Game = { Board : Board; mutable moves : Move list} with
                 let flag = this.DetermineFlag(startSquare, endSquare, pieceType)
                 let move = { StartSquare = startSquare; EndSquare = endSquare; MoveFlag = flag}
                 
-                this.moves <- move :: this.moves
+                moves <- move :: moves
 
                 if not (isEmpty targetPiece) then
                     () // Enemy piece captured; stop sliding
@@ -80,8 +86,11 @@ type Game = { Board : Board; mutable moves : Move list} with
                 
             slide 0
             
+        moves
+        
     member this.GenerateKnightMoves(startSquare) =
-        let (file, rank) = indexToCoord startSquare
+        let mutable moves : Move list = []
+        let file, rank = indexToCoord startSquare
         knightMoves
         |> List.iter (fun (dx, dy) ->
             let file', rank' = file + dx, rank + dy
@@ -90,10 +99,13 @@ type Game = { Board : Board; mutable moves : Move list} with
                 let flag = this.DetermineFlag(startSquare, endSquare, Piece.Knight)
                 let move = { StartSquare = startSquare; EndSquare = endSquare; MoveFlag = flag}
                 
-                this.moves <- move :: this.moves
+                moves <- move :: moves
         )
         
+        moves
+        
     member this.GeneratePawnMoves(startSquare) =
+        let mutable moves : Move list = []
         let mutable homeRank = 0
         let mutable pawnDirection = 0
         let mutable beforePromotionRank = 0
@@ -116,14 +128,14 @@ type Game = { Board : Board; mutable moves : Move list} with
                 
             promotions |> Array.iter (fun flag ->
                 let move = { StartSquare = startSquare; EndSquare = endSquare; MoveFlag = flag ||| MoveFlag.PawnMove}
-                this.moves <- move :: this.moves)
+                moves <- move :: moves)
             
         let addDoubleMoves =
             let endSquare = startSquare + 2 * pawnDirection
             let flag = MoveFlag.PawnMove ||| MoveFlag.DoublePawnMove
             let moveDouble = { StartSquare = startSquare; EndSquare = endSquare; MoveFlag = flag}
                 
-            this.moves <- moveDouble :: this.moves
+            moves <- moveDouble :: moves
             
         let addCaptures promotion =
             let mutable endSquares = []
@@ -137,7 +149,7 @@ type Game = { Board : Board; mutable moves : Move list} with
                 
                     promotions |> Array.iter (fun flag ->
                     let move = { StartSquare = startSquare; EndSquare = endSquare; MoveFlag = flag ||| MoveFlag.PawnMove ||| MoveFlag.Capture}
-                    this.moves <- move :: this.moves)
+                    moves <- move :: moves)
                 )
             
         
@@ -167,20 +179,82 @@ type Game = { Board : Board; mutable moves : Move list} with
             if startSquare + pawnDirection + 1 = this.Board.EnPassantSquare || startSquare + pawnDirection - 1 = this.Board.EnPassantSquare then
                 let flag = MoveFlag.PawnMove ||| MoveFlag.Capture ||| MoveFlag.EnPassant
                 let move = { StartSquare = startSquare; EndSquare = this.Board.EnPassantSquare; MoveFlag = flag}
-                this.moves <- move :: this.moves            
+                moves <- move :: moves
                 
+        moves
+                
+    member this.GenerateKingMoves(startSquare) =
+        let mutable moves : Move list = []
+        let file, rank = indexToCoord startSquare
+        kingMoves
+            |> List.iter (fun (dx, dy) ->
+            let file', rank' = file + dx, rank + dy
+            let endSquare = coordToIndex (file', rank')
+            if isOnBoard file' rank' && not <| isColor this.Board.Square[endSquare] this.Board.ColorToMove then
+                let flag = this.DetermineFlag(startSquare, endSquare, Piece.King)
+                let move = { StartSquare = startSquare; EndSquare = endSquare; MoveFlag = flag}
             
+                moves <- move :: moves
+        )
+        
+        moves
+            
+    
+    member private this.checkAttacked(square) =
+        this.Board.ColorToMove <- oppositeColor this.Board.ColorToMove
+        
+        let moves = this.GenerateMoves()
+        
+        moves |> List.exists (fun move -> move.EndSquare = square)
         
         
+    member this.GenerateCastles() = 
+        let startSquare =
+            match this.Board.ColorToMove with
+            | Piece.White -> 4
+            | Piece.Black -> 60
         
-                
+        
+        let mutable moves : Castle list = []
+        
+        if this.Board.CastleRights |> List.contains (Piece.King ||| this.Board.ColorToMove) then
+            let rookSquare = startSquare + 3
+            
+            if getPieceType this.Board.Square[rookSquare] = Piece.Rook then
+                let isCastlable = [startSquare + 1; startSquare + 2] |> List.forall ( fun square ->
+                    let isAttacked = this.checkAttacked(square)
+                    let isClear = getPieceType this.Board.Square[square] = Piece.None
                     
+                    isClear && not isAttacked
+                    )
                 
-                
-                
+                if isCastlable then
+                    moves <- Castle.Kingside :: moves
             
+        if this.Board.CastleRights |> List.contains (Piece.Queen ||| this.Board.ColorToMove) then
+            let rookSquare = startSquare - 4
+            
+            if getPieceType this.Board.Square[rookSquare] = Piece.Rook then
+                let isClear = [startSquare - 1; startSquare - 2; startSquare - 3;] |> List.forall ( fun square ->
+                    let isClear = getPieceType this.Board.Square[square] = Piece.None
+                    
+                    isClear
+                    )
+                
+                let isNotAttackable = [startSquare; startSquare - 1; startSquare - 2] |> List.forall ( fun square ->
+                    let isAttacked = this.checkAttacked(square)
+                    
+                    not isAttacked
+                    )
+                
+                if isClear && isNotAttackable then
+                    moves <- Castle.Queenside :: moves
+                    
+        if not (getPieceType this.Board.Square[startSquare] = Piece.King) then
+            moves <- []
+            
+        moves
 
+    
 let init() =
-    { Board = init(); moves = [] }
-    
-    
+    { Board = init(); moves = []; castles = [] }    
