@@ -2,6 +2,7 @@ module fchess.Core.Utils
 
 open System
 open Piece
+open fchess.Core.Board
 
 let cellToIndex (cell: string) =
     let file = int cell[0] - int 'a'       // 'a' = 0, ..., 'h' = 7
@@ -48,6 +49,51 @@ let parseFEN (fen:string) =
     
     board
         
-       
+
+let boardToFEN (board: Board) =
+    let sb = System.Text.StringBuilder()
+    
+    // Piece placement
+    for rank in 7 .. -1 .. 0 do
+        let mutable empty = 0
+        for file in 0 .. 7 do
+            let idx = rank * 8 + file
+            let piece = board.Square[idx]
+            if piece = Piece.None then
+                empty <- empty + 1
+            else
+                if empty > 0 then
+                    sb.Append(string empty) |> ignore
+                    empty <- 0
+                sb.Append(pieceToChar piece) |> ignore
+        if empty > 0 then
+            sb.Append(string empty) |> ignore
+        if rank > 0 then
+            sb.Append('/') |> ignore
+
+    // Color to move
+    let colorStr = match board.ColorToMove with
+                   | Piece.White -> " w"
+                   | Piece.Black -> " b"
+                   | _ -> " ?"
+    sb.Append(colorStr) |> ignore
+
+    // Castling rights
+    let castlingStr =
+        if board.CastleRights.IsEmpty then " -"
+        else " " + (board.CastleRights |> List.map pieceToChar |> List.toArray |> String)
+    sb.Append(castlingStr) |> ignore
+
+    // En passant square
+    let epStr =
+        if board.EnPassantSquare = -1 then " -"
+        else " " + indexToCell board.EnPassantSquare
+    sb.Append(epStr) |> ignore
+
+    // Halfmove clock and fullmove number
+    sb.AppendFormat(" {0} {1}", board.Halfmoves, board.MoveNumber) |> ignore
+
+    sb.ToString()
+
     
 

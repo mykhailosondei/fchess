@@ -78,7 +78,7 @@ with
         | Move move -> this.MakeMove(move)
         | Castle castle -> this.MakeCastle(castle)
 
-    member private this.MakeCastle(castle) =
+    member this.MakeCastle(castle) =
         let mutable kingStart = 0
         let mutable rookStart = 0
         let mutable kingFinish = 0
@@ -123,7 +123,7 @@ with
         this.ColorToMove <- oppositeColor this.ColorToMove
         
     
-    member private this.MakeMove(move : Move) =
+    member this.MakeMove(move : Move) =
         
         let mutable endSquarePiece = Piece.None 
         
@@ -146,7 +146,10 @@ with
         
         if specialty move.MoveFlag = MoveFlag.DoublePawnMove then
             assert (getPieceType this.Square[move.StartSquare] = Piece.Pawn)
-            this.EnPassantSquare <- (move.StartSquare + move.EndSquare) / 2
+            if Piece.Pawn ||| oppositeColor this.ColorToMove = this.Square[move.EndSquare+1] ||
+               Piece.Pawn ||| oppositeColor this.ColorToMove = this.Square[move.EndSquare-1]
+            then
+                this.EnPassantSquare <- (move.StartSquare + move.EndSquare) / 2
         else this.EnPassantSquare <- -1
             
         
@@ -170,11 +173,12 @@ with
             
         this.Square[move.StartSquare] <- Piece.None
         this.Square[move.EndSquare] <- endSquarePiece
-            
+       
+        this.Halfmoves <- this.Halfmoves + 1
+        
         if breaksRule move.MoveFlag then
             this.Halfmoves <- 0
         
-        this.Halfmoves <- this.Halfmoves + 1
         
         if this.ColorToMove = Piece.Black then
             this.MoveNumber <- this.MoveNumber + 1

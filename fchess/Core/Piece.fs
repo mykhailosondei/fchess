@@ -21,10 +21,11 @@ type Piece =
 let pieceTypeMask = enum<Piece> 0b00111
 let colorMask     = enum<Piece> 0b11000
 
-let private colorOfCase c =
+let colorOfCase c =
     match c with
     | c when Char.IsLower(c) -> Piece.Black
     | _ -> Piece.White
+    
 
 let charToPiece c =
     match c with
@@ -72,3 +73,17 @@ let isSliding piece =
     | Piece.Queen
     | Piece.Bishop -> true
     | _ -> false
+    
+    
+let pieceToChar (p: Piece) : char =
+    let isWhite = isColor p Piece.White
+    let pieceType = getPieceType p
+
+    match pieceType with
+    | Piece.Rook -> if isWhite then 'R' else 'r'
+    | Piece.Knight -> if isWhite then 'N' else 'n'
+    | Piece.Bishop -> if isWhite then 'B' else 'b'
+    | Piece.Queen -> if isWhite then 'Q' else 'q'
+    | Piece.King -> if isWhite then 'K' else 'k'
+    | Piece.Pawn -> if isWhite then 'P' else 'p'
+    | _ -> ' '

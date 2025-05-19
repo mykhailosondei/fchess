@@ -24,7 +24,7 @@ let specialty flag =
     flag &&& specialtyMask
     
 let breaksRule flag =
-    flag &&& ruleBreakMask = MoveFlag.None |> not
+    not (flag &&& ruleBreakMask = MoveFlag.None)
     
 let isCapture flag =
     flag &&& MoveFlag.Capture = MoveFlag.Capture

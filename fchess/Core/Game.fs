@@ -29,7 +29,7 @@ type Game = { Board : Board; mutable moves : Move list; mutable castles : Castle
             
         moves
         
-    member private this.DetermineFlag(startSquare, endSquare, pieceType) =
+    member this.DetermineFlag(startSquare, endSquare, pieceType) =
         let mutable result = MoveFlag.None
         if isColor this.Board.Square[endSquare] (oppositeColor this.Board.ColorToMove) then
             result <- result ||| MoveFlag.Capture
@@ -130,12 +130,13 @@ type Game = { Board : Board; mutable moves : Move list; mutable castles : Castle
                 let move = { StartSquare = startSquare; EndSquare = endSquare; MoveFlag = flag ||| MoveFlag.PawnMove}
                 moves <- move :: moves)
             
-        let addDoubleMoves =
+        let addDoubleMoves() =
             let endSquare = startSquare + 2 * pawnDirection
             let flag = MoveFlag.PawnMove ||| MoveFlag.DoublePawnMove
             let moveDouble = { StartSquare = startSquare; EndSquare = endSquare; MoveFlag = flag}
                 
             moves <- moveDouble :: moves
+            ()
             
         let addCaptures promotion =
             let mutable endSquares = []
@@ -154,16 +155,15 @@ type Game = { Board : Board; mutable moves : Move list; mutable castles : Castle
             
         
         match startRank with
-        | startRank when startRank = homeRank ->
+        | rank when rank = homeRank ->
             if isEmpty this.Board.Square[startSquare + pawnDirection] then
                 addNormalMoves false
                 if isEmpty this.Board.Square[startSquare + 2 * pawnDirection] then
-                    addDoubleMoves
+                    addDoubleMoves ()
                     
             addCaptures false
             
-        
-        | startRank when startRank = beforePromotionRank ->
+        | rank when rank = beforePromotionRank ->
             if isEmpty this.Board.Square[startSquare + pawnDirection] then
                 addNormalMoves true
             
@@ -204,6 +204,8 @@ type Game = { Board : Board; mutable moves : Move list; mutable castles : Castle
         this.Board.ColorToMove <- oppositeColor this.Board.ColorToMove
         
         let moves = this.GenerateMoves()
+        
+        this.Board.ColorToMove <- oppositeColor this.Board.ColorToMove
         
         moves |> List.exists (fun move -> move.EndSquare = square)
         
