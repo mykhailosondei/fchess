@@ -2,7 +2,6 @@ module fchess.Core.Board
 
 open Piece
 open fchess.Core.Move
-open fchess.Core.Piece
 
 type Board = {
     Square: Piece array

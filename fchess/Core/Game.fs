@@ -213,6 +213,7 @@ type Game = { Board : Board; } with
             match this.Board.ColorToMove with
             | Piece.White -> 4
             | Piece.Black -> 60
+            | _ -> failwith "Board must be either black or white"
         
         
         let mutable moves : Castle list = []

@@ -1,7 +1,6 @@
 module fchess.CLI.CommandProcessor
 
 open System.Collections.Generic
-open fchess.CLI.Commands
 open fchess.CLI.Commands.ICommandStrategy
 open fchess.CLI.Commands.PositionCommand
 open fchess.CLI.Commands.DisplayBoardCommand

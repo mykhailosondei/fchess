@@ -1,7 +1,6 @@
 module fchess.CLI.Commands.DisplayMovesCommand
 
 open fchess.CLI.Commands.ICommandStrategy
-open fchess.Core.Game
 open fchess.Core.Utils
 
 type DisplayMovesCommand() =
