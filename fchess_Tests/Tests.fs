@@ -8,6 +8,8 @@ open fchess.Core.Move
 open fchess.Core.Piece
 open fchess.Core.Utils
 
+let private startPosFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
 [<SetUp>]
 let Setup () =
     ()

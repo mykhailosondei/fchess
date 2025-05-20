@@ -11,6 +11,12 @@
         <Compile Include="Core\Board.fs" />
         <Compile Include="Core\Game.fs" />
         <Compile Include="Core\Utils.fs" />
+        <Compile Include="CLI\Commands\ICommandStrategy.fs" />
+        <Compile Include="CLI\Commands\DisplayBoardCommand.fs" />
+        <Compile Include="CLI\Commands\MakeMoveCommand.fs" />
+        <Compile Include="CLI\Commands\DisplayMovesCommand.fs" />
+        <Compile Include="CLI\Commands\PositionCommand.fs" />
+        <Compile Include="CLI\CommandProcessor.fs" />
         <Compile Include="CLI\CommandHandler.fs" />
         <Compile Include="CLI\Console.fs" />
         <Compile Include="Program.fs" />

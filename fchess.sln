@@ -4,6 +4,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "fchess", "fchess\fchess.fsp
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "fchess_Tests", "fchess_Tests\fchess_Tests.fsproj", "{9E46CBF7-36ED-4FB4-BC72-1A227588C229}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fchess_Client", "fchess_Client\fchess_Client.csproj", "{CDA527B6-D100-4BFF-9BCA-F1EEEA9DF428}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{9E46CBF7-36ED-4FB4-BC72-1A227588C229}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E46CBF7-36ED-4FB4-BC72-1A227588C229}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E46CBF7-36ED-4FB4-BC72-1A227588C229}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDA527B6-D100-4BFF-9BCA-F1EEEA9DF428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDA527B6-D100-4BFF-9BCA-F1EEEA9DF428}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDA527B6-D100-4BFF-9BCA-F1EEEA9DF428}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDA527B6-D100-4BFF-9BCA-F1EEEA9DF428}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

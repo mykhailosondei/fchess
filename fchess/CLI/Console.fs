@@ -1,6 +1,7 @@
 module fchess.CLI.Console
 
 open System
+open fchess.CLI.CommandProcessor
 open fchess.Core
 
 let run () =
@@ -17,8 +18,9 @@ let run () =
         | "help" ->
             printfn "Available commands: position, go, d, quit, ..."
             loop ()
-        | cmd -> 
-            let newState = CommandHandler.handle(gameState, cmd)
+        | cmd ->
+            let processor = CommandProcessor()
+            let newState = CommandHandler.handle processor (gameState, cmd)
             match newState with
             | Ok result -> gameState <- result
             | Error msg -> printfn $"%s{msg}"
