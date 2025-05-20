@@ -13,7 +13,7 @@ let private (|FEN|NotFEN|) (pattern: string) =
 
 type PositionCommand() =
     interface ICommandStrategy with
-        member this.Execute(state, fen) =
+        member this.Execute state fen =
             match fen with
             | "startpos" -> Result.Ok { state with Board = parseFEN startPosFEN}
             | FEN -> Result.Ok { state with Board = parseFEN fen}

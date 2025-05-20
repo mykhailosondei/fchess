@@ -4,9 +4,7 @@ open Board
 open fchess.Core.Move
 open fchess.Core.Piece
 
-
-
-type Game = { Board : Board; mutable moves : Move list; mutable castles : Castle list} with
+type Game = { Board : Board; } with
     member this.GenerateMoves() =
         let mutable moves : Move list = []
         
@@ -259,4 +257,4 @@ type Game = { Board : Board; mutable moves : Move list; mutable castles : Castle
 
     
 let init() =
-    { Board = init(); moves = []; castles = [] }    
+    { Board = init(); }    

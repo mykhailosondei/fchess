@@ -2,27 +2,39 @@ module fchess.CLI.Console
 
 open System
 open fchess.CLI.CommandProcessor
-open fchess.Core
+open fchess.CLI.Commands.ICommandStrategy
+
 
 let run () =
     printfn "Welcome to fchess Engine!"
     printfn "Type 'help' for available commands."
 
-    let mutable gameState = Game.init()  // Some initial game state
-
+    let processor = CommandProcessor()
+    
     let rec loop () =
         printf "> "
         let input = Console.ReadLine()
         match input with
         | "quit" -> printfn "Goodbye!"
         | "help" ->
-            printfn "Available commands: position, go, d, quit, ..."
+            printfn "Available commands: position, move, d, quit, moves, ..."
             loop ()
         | cmd ->
-            let processor = CommandProcessor()
-            let newState = CommandHandler.handle processor (gameState, cmd)
+            processor.DefaultStrategy <- Some (
+                { new ICommandStrategy with
+                    member _.Execute currentState _args =
+                        printfn "Command is not available."
+                        printfn "Available commands:"
+                        for command in processor.strategies.Keys do
+                            printfn $"{command}"
+                            
+                        Result.Ok currentState
+                })
+            
+            let newState = processor.ProcessCommand(cmd)
             match newState with
-            | Ok result -> gameState <- result
+            | Ok result ->
+                processor.state <- result
             | Error msg -> printfn $"%s{msg}"
             loop ()
     loop ()

@@ -28,7 +28,7 @@ let private makePly(state : Game, ply: Ply) =
 
 type MakeMoveCommand() =
     interface ICommandStrategy with
-        member this.Execute(state, moveString) =
+        member this.Execute state moveString =
             match toPly(moveString) with
                 | Some(Move move) ->
                     let moves = state.GenerateMoves()

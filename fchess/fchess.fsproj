@@ -17,7 +17,6 @@
         <Compile Include="CLI\Commands\DisplayMovesCommand.fs" />
         <Compile Include="CLI\Commands\PositionCommand.fs" />
         <Compile Include="CLI\CommandProcessor.fs" />
-        <Compile Include="CLI\CommandHandler.fs" />
         <Compile Include="CLI\Console.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
