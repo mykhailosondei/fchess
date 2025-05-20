@@ -1,4 +1,5 @@
-using fchess_Client.Components;
+using fchessClient.Components;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

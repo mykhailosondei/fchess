@@ -2,7 +2,6 @@
 
 open NUnit.Framework
 
-open fchess.CLI.CommandHandler
 open fchess.Core
 open fchess.Core.Move
 open fchess.Core.Piece
@@ -264,7 +263,7 @@ let TestDetermineFlag_QueensRook_White () =
     
     let flag = game.DetermineFlag(startSquare, endSquare, pieceType)
     
-    let result = flag = (MoveFlag.QueenRookMove)
+    let result = flag = MoveFlag.QueenRookMove
     
     Assert.That(result)
     
@@ -280,7 +279,7 @@ let TestDetermineFlag_KingsRook_White () =
     
     let flag = game.DetermineFlag(startSquare, endSquare, pieceType)
     
-    let result = flag = (MoveFlag.KingRookMove)
+    let result = flag = MoveFlag.KingRookMove
     
     Assert.That(result)
     
@@ -296,7 +295,7 @@ let TestDetermineFlag_QueensRook_Black () =
     
     let flag = game.DetermineFlag(startSquare, endSquare, pieceType)
     
-    let result = flag = (MoveFlag.QueenRookMove)
+    let result = flag = MoveFlag.QueenRookMove
     
     Assert.That(result)
     
@@ -312,6 +311,6 @@ let TestDetermineFlag_KingsRook_Black () =
     
     let flag = game.DetermineFlag(startSquare, endSquare, pieceType)
     
-    let result = flag = (MoveFlag.KingRookMove)
+    let result = flag = MoveFlag.KingRookMove
     
     Assert.That(result)
