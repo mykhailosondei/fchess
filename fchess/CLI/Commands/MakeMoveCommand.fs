@@ -24,6 +24,11 @@ let private toPly (pattern: string) =
 
 let private makePly(state : Game, ply: Ply) =
     state.Board.MakePly(ply)
+    let bestPly = state.ChooseBestPly()
+    match bestPly with
+    | Some(ply) -> state.Board.MakePly(ply)
+    | None -> printfn "Checkmate"
+    
     Result.Ok state
 
 type MakeMoveCommand() =
@@ -31,7 +36,7 @@ type MakeMoveCommand() =
         member this.Execute state moveString =
             match toPly(moveString) with
                 | Some(Move move) ->
-                    let moves = state.GenerateMoves()
+                    let moves = state.Board.GenerateMoves()
                     let move' = moves |> List.tryFind (
                         fun x -> x.EndSquare = move.EndSquare && x.StartSquare = move.StartSquare
                     )
@@ -39,7 +44,7 @@ type MakeMoveCommand() =
                     | Some foundMove -> makePly(state, Move(foundMove))
                     | None -> Result.Error("Move is not legal")
                 | Some(Castle castle) ->
-                    let castles = state.GenerateCastles()
+                    let castles = state.Board.GenerateCastles()
                     let castle' = castles |> List.tryFind (fun x -> x = castle)
                     
                     match castle' with

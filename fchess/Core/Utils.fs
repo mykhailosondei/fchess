@@ -2,7 +2,7 @@ module fchess.Core.Utils
 
 open System
 open Piece
-open fchess.Core.Board
+open Board
 
 let cellToIndex (cell: string) =
     let file = int cell[0] - int 'a'       // 'a' = 0, ..., 'h' = 7

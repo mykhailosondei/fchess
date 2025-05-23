@@ -1,0 +1,304 @@
+@using static fchess.Core.Piece.Piece
+@using Game = fchess.Core.Game
+@using Move = fchess.Core.Move
+@using Ply = fchess.Core.Move.Ply
+@using System.Linq 
+@using fchess.Core
+
+@rendermode InteractiveServer
+
+<h3>Chessboard</h3>
+
+@if (isPromotionPending)
+{
+    <div class="promotion-choice">
+        <h4>Promote Pawn to:</h4>
+        <button @onclick="() => HandlePromotionChoice(Queen)">Queen</button>
+        <button @onclick="() => HandlePromotionChoice(Rook)">Rook</button>
+        <button @onclick="() => HandlePromotionChoice(Bishop)">Bishop</button>
+        <button @onclick="() => HandlePromotionChoice(Knight)">Knight</button>
+    </div>
+}
+
+<div class="chessboard-container"> @* Added for centering later *@
+    <div class="chessboard">
+        @for (int rank = 7; rank >= 0; rank--)
+        {
+            <div class="rank">
+                @for (int file = 0; file < 8; file++)
+                {
+                    var cellIndex = rank * 8 + file;
+                    var piece = game.Board.Square[cellIndex];
+                    var isSelected = cellIndex == selectedSquareIndex;
+                    var isLegalMoveTarget = legalMovesForSelectedPiece.Any(m => m.EndSquare == cellIndex);
+                    var isCastleTargetRook = IsCastleTargetRook(cellIndex);
+
+                    var squareClasses = GetSquareColor(file, rank);
+                    if (isSelected) squareClasses += " selected-square";
+                    if (isLegalMoveTarget) squareClasses += " legal-move-square";
+                    if (isCastleTargetRook) squareClasses += " legal-move-square";
+
+                    <div class="square @squareClasses" @onclick="() => SquareClicked(cellIndex)">
+                        @if (piece != None)
+                        {
+                            <span class="piece">@GetPieceUnicode(piece)</span>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+<div>Turn: @game.Board.ColorToMove</div>
+<div>Selected: @selectedSquareIndex</div>
+
+@code {
+    private Game.Game game;
+    private int selectedSquareIndex = -1;
+    private List<Move.Move> legalMovesForSelectedPiece = new ();
+    private List<Move.Castle> availableKingCastles = new ();
+
+    private bool isPromotionPending = false;
+    private int promotionStartSquare;
+    private int promotionEndSquare;
+
+    protected override void OnInitialized()
+    {
+        var gameBoard = Utils.parseFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        game = Game.initWithBoard(gameBoard);
+    }
+
+    private string GetSquareColor(int file, int rank)
+    {
+        return (file + rank) % 2 == 0 ? "light-square" : "dark-square";
+    }
+
+    private void SquareClicked(int cellIndex)
+    {
+        if (isPromotionPending) return; // Don't process board clicks if waiting for promotion choice
+
+        var clickedPiece = game.Board.Square[cellIndex];
+
+        if (selectedSquareIndex == -1)
+        {
+            if (clickedPiece != None && Piece.isColor(clickedPiece, game.Board.ColorToMove))
+            {
+                SelectPiece(cellIndex);
+            }
+        }
+        else 
+        {
+            var currentlySelectedPiece = game.Board.Square[selectedSquareIndex];
+            var typeOfSelectedPiece = Piece.getPieceType(currentlySelectedPiece);
+
+            if (typeOfSelectedPiece == King &&
+                clickedPiece != None &&
+                Piece.isColor(clickedPiece, game.Board.ColorToMove) &&
+                Piece.getPieceType(clickedPiece) == Rook)
+            {
+                var castleTypeToAttempt = DetermineCastleType(selectedSquareIndex, cellIndex, game.Board.ColorToMove);
+                if (castleTypeToAttempt != null && availableKingCastles.Contains(castleTypeToAttempt))
+                {
+                    PerformCastle(castleTypeToAttempt);
+                    StateHasChanged();
+                    return;
+                }
+            }
+
+            Move.Move? moveCandidate = legalMovesForSelectedPiece.FirstOrDefault(m => m.EndSquare == cellIndex);
+            
+            if (moveCandidate!= null)
+            {
+                if (IsPawnPromotionMove(moveCandidate))
+                {
+                    isPromotionPending = true;
+                    promotionStartSquare = moveCandidate.StartSquare;
+                    promotionEndSquare = moveCandidate.EndSquare;
+                    // Do not make the move yet, wait for user's choice from HandlePromotionChoice
+                }
+                else
+                {
+                    PerformMove(moveCandidate);
+                }
+                StateHasChanged();
+                return;
+            }
+
+            if (clickedPiece != None && Piece.isColor(clickedPiece, game.Board.ColorToMove))
+            {
+                SelectPiece(cellIndex); 
+            }
+            else
+            {
+                DeselectPiece();
+            }
+        }
+        StateHasChanged();
+    }
+
+    private void SelectPiece(int squareIndex)
+    {
+        selectedSquareIndex = squareIndex;
+        var piece = game.Board.Square[squareIndex];
+        var pieceType = Piece.getPieceType(piece);
+
+        var allMoves = game.GenerateLegalMoves().ToList();
+        legalMovesForSelectedPiece = allMoves.Where(m => m.StartSquare == selectedSquareIndex).ToList();
+        
+        availableKingCastles.Clear();
+        if (pieceType == King)
+        {
+            availableKingCastles = game.Board.GenerateCastles().ToList();
+        }
+        Console.WriteLine($"Selected {Utils.indexToCell(squareIndex)}. Legal moves: {legalMovesForSelectedPiece.Count}, Castles: {availableKingCastles.Count}");
+    }
+
+    private void DeselectPiece()
+    {
+        selectedSquareIndex = -1;
+        legalMovesForSelectedPiece.Clear();
+        availableKingCastles.Clear();
+        Console.WriteLine("Selection cleared.");
+    }
+
+    private void PerformMove(Move.Move move)
+    {
+        Console.WriteLine($"Moving {Utils.indexToCell(move.StartSquare)} to {Utils.indexToCell(move.EndSquare)} with flag {move.MoveFlag}");
+        game.Board.MakePly(Ply.NewMove(move));
+        DeselectPiece();
+        // AI Opponent Move
+        var bestPly = game.ChooseBestPly();
+        if (bestPly != null)
+        {
+            game.Board.MakePly(bestPly.Value);
+            Console.WriteLine($"AI moved. Turn: {game.Board.ColorToMove}");
+        }
+        else
+        {
+            Console.WriteLine(game.Board.IsInCheck() ? "Checkmate! Player wins." : "Stalemate!");
+        }
+        Console.WriteLine($"Move made by player. Turn: {game.Board.ColorToMove}");
+    }
+
+    private void PerformCastle(Move.Castle castleType)
+    {
+        Console.WriteLine($"Castling: {castleType}");
+        game.Board.MakePly(Ply.NewCastle(castleType));
+        DeselectPiece();
+        // AI Opponent Move
+        var bestPly = game.ChooseBestPly();
+        if (bestPly != null)
+        {
+            game.Board.MakePly(bestPly.Value);
+            Console.WriteLine($"AI moved. Turn: {game.Board.ColorToMove}");
+        }
+        else
+        {
+             Console.WriteLine(game.Board.IsInCheck() ? "Checkmate! Player wins." : "Stalemate!");
+        }
+        Console.WriteLine($"Castle made by player. Turn: {game.Board.ColorToMove}");
+    }
+
+    private bool IsPawnPromotionMove(Move.Move move)
+    {
+        var pieceOnStartSquare = game.Board.Square[move.StartSquare];
+        if (Piece.getPieceType(pieceOnStartSquare) != Pawn)
+            return false;
+
+        var endRank = move.EndSquare / 8;
+        var pieceColor = Piece.getColor(pieceOnStartSquare);
+
+        if (pieceColor != null) // Ensure color exists
+        {
+            if (pieceColor.Value == White && endRank == 7) return true;
+            if (pieceColor.Value == Black && endRank == 0) return true;
+        }
+        return false;
+    }
+
+    private void HandlePromotionChoice(Piece.Piece chosenPromotionPieceType)
+    {
+        // Find the specific move from legalMovesForSelectedPiece that matches the start, end, and promotion type
+        // The MoveFlag for promotion pieces are: Queen=4, Knight=5, Rook=6, Bishop=7 (from Move.fs)
+        // The piece types are King=1, Pawn=2, Knight=3, Bishop=4, Rook=5, Queen=6
+
+        Move.MoveFlag targetPromotionFlag = chosenPromotionPieceType switch {
+            Queen => Move.MoveFlag.PromoteToQueen,
+            Rook => Move.MoveFlag.PromoteToRook,
+            Knight => Move.MoveFlag.PromoteToKnight,
+            Bishop => Move.MoveFlag.PromoteToBishop,
+            _ => Move.MoveFlag.None // Should not happen
+        };
+
+        var promotionMove = legalMovesForSelectedPiece.FirstOrDefault(m =>
+            m.StartSquare == promotionStartSquare &&
+            m.EndSquare == promotionEndSquare &&
+            (m.MoveFlag & Move.specialtyMask) == targetPromotionFlag // specialtyMask isolates the promotion part
+        );
+
+        if (promotionMove.StartSquare == promotionStartSquare) // Check if a valid move was found (structs are non-nullable)
+        {
+            PerformMove(promotionMove);
+        }
+        else
+        {
+             // This case should ideally not be reached if IsPawnPromotionMove was true
+             // and legalMovesForSelectedPiece contains all promotion variants.
+            Console.WriteLine($"Error: Could not find specific promotion move for {chosenPromotionPieceType}");
+        }
+
+        isPromotionPending = false;
+        // DeselectPiece() is called by PerformMove
+        StateHasChanged();
+    }
+
+    private Move.Castle? DetermineCastleType(int kingSquare, int rookSquare, Piece.Piece kingColor)
+    {
+        if (kingColor == White)
+        {
+            if (kingSquare == 4 && rookSquare == 7) return Move.Castle.Kingside;
+            if (kingSquare == 4 && rookSquare == 0) return Move.Castle.Queenside;
+        }
+        else // Black
+        {
+            if (kingSquare == 60 && rookSquare == 63) return Move.Castle.Kingside;
+            if (kingSquare == 60 && rookSquare == 56) return Move.Castle.Queenside;
+        }
+        return null; // Invalid/unmatchable castling type
+    }
+
+    private bool IsCastleTargetRook(int rookSquareIndex)
+    {
+        if (selectedSquareIndex == -1 || Piece.getPieceType(game.Board.Square[selectedSquareIndex]) != King)
+        {
+            return false;
+        }
+        if (game.Board.Square[rookSquareIndex] == None || Piece.getPieceType(game.Board.Square[rookSquareIndex]) != Rook || !Piece.isColor(game.Board.Square[rookSquareIndex], game.Board.ColorToMove))
+        {
+            return false;
+        }
+
+        var castleType = DetermineCastleType(selectedSquareIndex, rookSquareIndex, game.Board.ColorToMove);
+        return castleType != null && availableKingCastles.Contains(castleType);
+    }
+
+    private string GetPieceUnicode(Piece.Piece piece)
+    {
+        return piece switch
+        {
+            King   | White => "♔",
+            Queen  | White => "♕",
+            Rook   | White => "♖",
+            Bishop | White => "♗",
+            Knight | White => "♘",
+            Pawn   | White => "♙",
+            King   | Black => "♚",
+            Queen  | Black => "♛",
+            Rook   | Black => "♜",
+            Bishop | Black => "♝",
+            Knight | Black => "♞",
+            Pawn   | Black => "♟",
+            _ => ""
+        };
+    }
+} 

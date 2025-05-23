@@ -202,7 +202,7 @@ let TestGenMovesLength_AgainstStockfish_Startpos () =
     
     let game = {Game.init() with Board = board} 
     
-    let moveCount = game.GenerateMoves().Length
+    let moveCount = game.Board.GenerateMoves().Length
     
     let stockfishOutput = stockFishMoveCount startPosFEN
     
@@ -211,13 +211,45 @@ let TestGenMovesLength_AgainstStockfish_Startpos () =
     Assert.That(result)
     
 [<Test>]
+let TestGenLegalMovesLength_AgainstStockfish_Startpos () =
+    let board = parseFEN startPosFEN
+    
+    let game = {Game.init() with Board = board} 
+    
+    let moveCount = game.GenerateLegalMoves().Length
+    
+    let stockfishOutput = stockFishMoveCount startPosFEN
+    
+    let result = stockfishOutput = moveCount 
+    
+    Assert.That(result)
+    
+    
+[<Test>]
+let TestGenLegalMovesLength_AgainstStockfish_Random () =
+    let board = parseFEN "r2q1rk1/2p1bppp/p1n1bn2/1p2p3/4P3/2P2N2/PPBN1PPP/R1BQR1K1 w - - 1 12"
+    
+    let game = {Game.init() with Board = board}
+    
+    let moveCount = game.GenerateLegalMoves().Length
+    
+    let stockfishOutput = stockFishMoveCount "r2q1rk1/2p1bppp/p1n1bn2/1p2p3/4P3/2P2N2/PPBN1PPP/R1BQR1K1 w - - 1 12"
+    
+    let result = stockfishOutput = moveCount
+    
+    printfn $"{stockfishOutput}"
+    printfn $"{moveCount}"
+    
+    Assert.That(result)
+
+[<Test>]
 let TestGenMovesLength_AgainstStockfish_Random () =
     let fen = "rnbqkb1r/pp1p1ppp/5n2/2p1p3/4P3/3P4/PPP1NPPP/RNBQKB1R w KQkq - 0 4"
     let board = parseFEN fen
     
     let game = {Game.init() with Board = board} 
     
-    let moveCount = game.GenerateMoves().Length
+    let moveCount = game.Board.GenerateMoves().Length
     
     let stockfishOutput = stockFishMoveCount fen
     
@@ -231,7 +263,7 @@ let TestGenCastlesLength_NoCastlesInFen () =
     
     let game = {Game.init() with Board = board} 
    
-    let castleCount = game.GenerateCastles().Length
+    let castleCount = game.Board.GenerateCastles().Length
     
     let result = castleCount = 0
     
@@ -243,7 +275,7 @@ let TestGenCastlesLength_2Castles () =
     
     let game = {Game.init() with Board = board} 
    
-    let castleCount = game.GenerateCastles().Length
+    let castleCount = game.Board.GenerateCastles().Length
     
     printfn "%d" castleCount
     
@@ -261,7 +293,7 @@ let TestDetermineFlag_QueensRook_White () =
     let endSquare = 8   // a2
     let pieceType = Piece.Rook
     
-    let flag = game.DetermineFlag(startSquare, endSquare, pieceType)
+    let flag = game.Board.DetermineFlag(startSquare, endSquare, pieceType)
     
     let result = flag = MoveFlag.QueenRookMove
     
@@ -277,7 +309,7 @@ let TestDetermineFlag_KingsRook_White () =
     let endSquare = 15  // h2
     let pieceType = Piece.Rook
     
-    let flag = game.DetermineFlag(startSquare, endSquare, pieceType)
+    let flag = game.Board.DetermineFlag(startSquare, endSquare, pieceType)
     
     let result = flag = MoveFlag.KingRookMove
     
@@ -293,7 +325,7 @@ let TestDetermineFlag_QueensRook_Black () =
     let endSquare = 48   // a7
     let pieceType = Piece.Rook
     
-    let flag = game.DetermineFlag(startSquare, endSquare, pieceType)
+    let flag = game.Board.DetermineFlag(startSquare, endSquare, pieceType)
     
     let result = flag = MoveFlag.QueenRookMove
     
@@ -309,8 +341,31 @@ let TestDetermineFlag_KingsRook_Black () =
     let endSquare = 55   // h7
     let pieceType = Piece.Rook
     
-    let flag = game.DetermineFlag(startSquare, endSquare, pieceType)
+    let flag = game.Board.DetermineFlag(startSquare, endSquare, pieceType)
     
     let result = flag = MoveFlag.KingRookMove
     
     Assert.That(result)
+
+[<Test>]
+let TestPerft_Depth4_Startpos () =
+    let board = parseFEN startPosFEN
+    
+    let game = {Game.init() with Board = board}
+    
+    let perft = game.GeneratePerft(4)
+    
+    perft = 197281 |> Assert.That
+    
+[<Test>]
+let TestPerft_Depth3_Position5 () =
+    let board = parseFEN "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  "
+    
+    let game = {Game.init() with Board = board}
+    
+    let perft = game.GeneratePerft(3)
+    
+    printfn $"{perft}"
+    
+    perft = 62379 |> Assert.That
+    

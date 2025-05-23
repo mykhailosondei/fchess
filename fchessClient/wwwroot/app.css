@@ -58,3 +58,88 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr); /* For Blazor, 1fr might not work, consider fixed size like 50px */
+    grid-template-rows: repeat(8, 1fr); /* For Blazor, 1fr might not work, consider fixed size like 50px */
+    width: 400px; /* Adjust as needed */
+    height: 400px; /* Adjust as needed */
+    border: 1px solid #333;
+}
+
+.rank {
+    display: contents; /* Allows squares to be direct children of the grid */
+}
+
+.square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px; /* For cell name, can be adjusted/removed */
+    position: relative; /* For potential piece positioning */
+}
+
+.light-square {
+    background-color: #f0d9b5;
+}
+
+.dark-square {
+    background-color: #b58863;
+}
+
+.cell-name {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    color: #666;
+    font-size: 0.6em;
+}
+
+/* Example piece style (we'll refine this later) */
+.piece {
+    font-size: 30px; /* Adjust as needed */
+    cursor: pointer;
+}
+
+.selected-square {
+    background-color: #7fa650 !important; /* A greenish highlight for selected square */
+}
+
+.legal-move-square {
+    background-color: #c3d8a8 !important; /* A lighter green for legal moves */
+    /* You could also use box-shadow or a border */
+}
+
+.legal-move-square.dark-square {
+    background-color: #abb881 !important; /* Adjusted for dark squares */
+}
+
+.legal-move-square.light-square {
+    background-color: #d4e0ba !important; /* Adjusted for light squares */
+}
+
+.castle-rook-target-square {
+    /* Example: a different shade of green or a border */
+    box-shadow: 0 0 10px 3px gold !important;
+    /* background-color: #a9d18e !important; */ /* Or another color */
+}
+
+.chessboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* min-height: 80vh; */ /* Adjust as needed to fill viewport height */
+    padding-top: 20px; /* Some spacing from the top */
+}
+
+.promotion-choice {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.promotion-choice button {
+    margin: 0 5px;
+    padding: 8px 15px;
+    font-size: 1em;
+}

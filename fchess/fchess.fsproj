@@ -9,8 +9,8 @@
         <Compile Include="Core\Piece.fs" />
         <Compile Include="Core\Move.fs" />
         <Compile Include="Core\Board.fs" />
-        <Compile Include="Core\Game.fs" />
         <Compile Include="Core\Utils.fs" />
+        <Compile Include="Core\Game.fs" />
         <Compile Include="CLI\Commands\ICommandStrategy.fs" />
         <Compile Include="CLI\Commands\DisplayBoardCommand.fs" />
         <Compile Include="CLI\Commands\MakeMoveCommand.fs" />

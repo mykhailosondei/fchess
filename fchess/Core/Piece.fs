@@ -27,12 +27,13 @@ let colorOfCase c =
     | _ -> Piece.White
     
 
+
 let charToPiece c =
     match c with
     | 'r'
     | 'R' -> Piece.Rook ||| colorOfCase c
     | 'n'
-    | 'N' -> Piece.Knight ||| colorOfCase c 
+    | 'N' -> Piece.Knight ||| colorOfCase c
     | 'k'
     | 'K' -> Piece.King ||| colorOfCase c
     | 'b'
@@ -87,3 +88,16 @@ let pieceToChar (p: Piece) : char =
     | Piece.King -> if isWhite then 'K' else 'k'
     | Piece.Pawn -> if isWhite then 'P' else 'p'
     | _ -> ' '
+    
+let Value p =
+    let piece = getPieceType p
+    
+    match piece with
+    | Piece.None -> 0
+    | Piece.Pawn -> 100
+    | Piece.Bishop -> 300
+    | Piece.Knight -> 300
+    | Piece.Rook -> 500
+    | Piece.Queen -> 900
+    | _ -> 0
+    

@@ -4,7 +4,6 @@ open System
 open fchess.CLI.CommandProcessor
 open fchess.CLI.Commands.ICommandStrategy
 
-
 let run () =
     printfn "Welcome to fchess Engine!"
     printfn "Type 'help' for available commands."
