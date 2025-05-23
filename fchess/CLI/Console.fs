@@ -3,6 +3,7 @@ module fchess.CLI.Console
 open System
 open fchess.CLI.CommandProcessor
 open fchess.CLI.Commands.ICommandStrategy
+open fchess.Core.Utils
 
 let run () =
     printfn "Welcome to fchess Engine!"
@@ -25,7 +26,7 @@ let run () =
                         printfn "Command is not available."
                         printfn "Available commands:"
                         for command in processor.strategies.Keys do
-                            printfn $"{command}"
+                            log (createLogEntry Debug "Available command" command)
                             
                         Result.Ok currentState
                 })
@@ -34,6 +35,5 @@ let run () =
             match newState with
             | Ok result ->
                 processor.state <- result
-            | Error msg -> printfn $"%s{msg}"
             loop ()
     loop ()

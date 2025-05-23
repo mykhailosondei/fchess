@@ -97,3 +97,35 @@ let boardToFEN (board: Board) =
 
     
 
+type LogLevel =
+    | Info
+    | Debug
+    | Warning
+    | Error
+
+type LogEntry<'T> = {
+    Timestamp: DateTime
+    Level: LogLevel
+    Message: string
+    Data: 'T
+}
+
+let createLogEntry<'T> (level: LogLevel) (message: string) (data: 'T) : LogEntry<'T> =
+    {
+        Timestamp = DateTime.UtcNow
+        Level = level
+        Message = message
+        Data = data
+    }
+
+let log<'T> (entry: LogEntry<'T>) : unit =
+    let logString =
+        sprintf "[%s] [%A] %s - Data: %A"
+            (entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"))
+            entry.Level
+            entry.Message
+            entry.Data
+    printfn "%s" logString
+
+    
+
