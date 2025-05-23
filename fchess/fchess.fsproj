@@ -21,4 +21,8 @@
         <Compile Include="Program.fs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="FsUnit" Version="7.0.1" />
+    </ItemGroup>
+
 </Project>

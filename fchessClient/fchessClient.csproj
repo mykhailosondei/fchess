@@ -10,6 +10,10 @@
       <ProjectReference Include="..\fchess\fchess.fsproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="FsUnit" Version="7.0.1" />
+    </ItemGroup>
+
     <Target Name="ForceStaticAssets" AfterTargets="Build">
         <ItemGroup>
             <ResolvedFileToPublish Include="$(ProjectDir)wwwroot\**\*.*" />

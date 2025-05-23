@@ -143,3 +143,56 @@ h1:focus {
     padding: 8px 15px;
     font-size: 1em;
 }
+
+/* Terminal View Styles */
+.terminal-view {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #282c34; /* Dark background */
+    color: #abb2bf; /* Light grey text */
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    max-width: 800px; /* Or full width as desired */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.terminal-output {
+    height: 200px; /* Adjust as needed */
+    overflow-y: auto;
+    margin-bottom: 10px;
+    border: 1px solid #3e4451;
+    padding: 10px;
+    white-space: pre-wrap; /* Preserve whitespace and newlines from output */
+}
+
+.output-line {
+    margin-bottom: 3px;
+}
+
+.terminal-input-area {
+    display: flex;
+    align-items: center;
+}
+
+.terminal-input-area .prompt {
+    margin-right: 8px;
+    color: #61afef; /* Prompt color */
+}
+
+.terminal-input-area input[type="text"] {
+    flex-grow: 1;
+    background-color: #21252b;
+    color: #abb2bf;
+    border: 1px solid #3e4451;
+    padding: 5px;
+    outline: none;
+}
+
+.terminal-output .command-echo {
+    color: #98c379; /* Green for echoed commands */
+}
+
+.terminal-output .error-message {
+    color: #e06c75; /* Red for error messages */
+}

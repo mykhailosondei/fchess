@@ -104,7 +104,6 @@ type Game = { mutable Board : Board; } with
         let mutable bestMove : Ply option = None 
         
         for move in moves do
-            printfn $"{move}"
             this.Board.MakeMove(move)
             let eval = -this.Search(2)
             if eval > bestEval then

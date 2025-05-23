@@ -20,7 +20,7 @@
     </div>
 }
 
-<div class="chessboard-container"> @* Added for centering later *@
+<div class="chessboard-container">
     <div class="chessboard">
         @for (int rank = 7; rank >= 0; rank--)
         {
@@ -114,7 +114,7 @@
                     isPromotionPending = true;
                     promotionStartSquare = moveCandidate.StartSquare;
                     promotionEndSquare = moveCandidate.EndSquare;
-                    // Do not make the move yet, wait for user's choice from HandlePromotionChoice
+                    // Do not make the move yet, wait for user's choice of promotion
                 }
                 else
                 {
@@ -218,9 +218,6 @@
 
     private void HandlePromotionChoice(Piece.Piece chosenPromotionPieceType)
     {
-        // Find the specific move from legalMovesForSelectedPiece that matches the start, end, and promotion type
-        // The MoveFlag for promotion pieces are: Queen=4, Knight=5, Rook=6, Bishop=7 (from Move.fs)
-        // The piece types are King=1, Pawn=2, Knight=3, Bishop=4, Rook=5, Queen=6
 
         Move.MoveFlag targetPromotionFlag = chosenPromotionPieceType switch {
             Queen => Move.MoveFlag.PromoteToQueen,
@@ -236,19 +233,16 @@
             (m.MoveFlag & Move.specialtyMask) == targetPromotionFlag // specialtyMask isolates the promotion part
         );
 
-        if (promotionMove.StartSquare == promotionStartSquare) // Check if a valid move was found (structs are non-nullable)
+        if (promotionMove.StartSquare == promotionStartSquare)
         {
             PerformMove(promotionMove);
         }
         else
         {
-             // This case should ideally not be reached if IsPawnPromotionMove was true
-             // and legalMovesForSelectedPiece contains all promotion variants.
             Console.WriteLine($"Error: Could not find specific promotion move for {chosenPromotionPieceType}");
         }
 
         isPromotionPending = false;
-        // DeselectPiece() is called by PerformMove
         StateHasChanged();
     }
 

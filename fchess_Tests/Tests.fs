@@ -3,6 +3,7 @@
 open NUnit.Framework
 
 open fchess.Core
+open FsUnit
 open fchess.Core.Move
 open fchess.Core.Piece
 open fchess.Core.Utils
@@ -25,9 +26,7 @@ let TestBoardMakePly_Pawn () =
     printfn "%s" (board.ToString())
     printfn "%s" (expected.ToString())
     
-    let test = board = expected
-    
-    Assert.That(test)
+    board |> should equal expected 
         
 [<Test>]
 let TestBoardMakePly_Castle () =
@@ -41,9 +40,7 @@ let TestBoardMakePly_Castle () =
     printfn "%s" (board.ToString())
     printfn "%s" (expected.ToString())
     
-    let test = board = expected
-    
-    Assert.That(test)
+    board |> should equal expected 
     
 [<Test>]
 let TestBoardMakeCastle_Queenside () =
@@ -57,9 +54,7 @@ let TestBoardMakeCastle_Queenside () =
     printfn "%s" (board.ToString())
     printfn "%s" (expected.ToString())
     
-    let test = board = expected
-    
-    Assert.That(test)
+    board |> should equal expected
     
     
 [<Test>]
@@ -74,9 +69,7 @@ let TestBoardMakeCastle_Kingside () =
     printfn "%s" (board.ToString())
     printfn "%s" (expected.ToString())
     
-    let test = board = expected
-    
-    Assert.That(test)
+    board |> should equal expected
     
 [<Test>]
 let TestBoardMakeMove_Sequence () =
@@ -92,9 +85,7 @@ let TestBoardMakeMove_Sequence () =
     printfn "%s" (board.ToString())
     printfn "%s" (expected.ToString())
     
-    let test = board = expected
-    
-    Assert.That(test)
+    board |> should equal expected
     
     
 [<Test>]
@@ -109,9 +100,7 @@ let TestBoardMakeMove_DoublePawnMove_ShouldHaveEnPassant () =
     printfn "%s" (board.ToString())
     printfn "%s" (expected.ToString())
     
-    let test = board = expected
-    
-    Assert.That(test)
+    board |> should equal expected
 
 [<Test>]
 let TestIsColor_White () =
