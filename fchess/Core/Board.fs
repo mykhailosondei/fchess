@@ -120,7 +120,7 @@ with
             this.MoveNumber <- this.MoveNumber + 1
         
         this.ColorToMove <- oppositeColor this.ColorToMove
-
+    
     
     member this.MakeMove(move : Move) =
         
@@ -141,12 +141,13 @@ with
             endSquarePiece <- Piece.Bishop ||| this.ColorToMove
         | _ ->
             endSquarePiece <- this.Square[move.StartSquare]
-            
+          
+        let colorFilter = isColor <| oppositeColor this.ColorToMove
             
         match specialty move.MoveFlag with
         | MoveFlag.KingMove ->
             assert (getPieceType this.Square[move.StartSquare] = Piece.King)
-            this.CastleRights <- this.CastleRights |> List.where (fun x -> (isColor x <| oppositeColor this.ColorToMove))
+            this.CastleRights <- this.CastleRights |> List.where colorFilter
         | MoveFlag.QueenRookMove ->
             assert (getPieceType this.Square[move.StartSquare] = Piece.Rook)
             this.CastleRights <- this.CastleRights |> List.where (fun right -> not (Piece.Queen ||| this.ColorToMove = right))
