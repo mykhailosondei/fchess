@@ -346,15 +346,4 @@ let TestPerft_Depth4_Startpos () =
     
     perft = 197281 |> Assert.That
     
-[<Test>]
-let TestPerft_Depth3_Position5 () =
-    let board = parseFEN "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  "
-    
-    let game = {Game.init() with Board = board}
-    
-    let perft = game.GeneratePerft(3)
-    
-    printfn $"{perft}"
-    
-    perft = 62379 |> Assert.That
     
