@@ -10,6 +10,8 @@ open fchess.Core.Utils
 
 let private startPosFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
+let private startPosFEN_source() =seq{ startPosFEN }
+
 [<SetUp>]
 let Setup () =
     ()
@@ -26,7 +28,7 @@ let TestBoardMakePly_Pawn () =
     printfn "%s" (board.ToString())
     printfn "%s" (expected.ToString())
     
-    board |> should equal expected 
+    board |> should equal expected
         
 [<Test>]
 let TestBoardMakePly_Castle () =
@@ -186,7 +188,10 @@ let stockFishMoveCount fen =
     perftResult
     
 [<Test>]
-let TestGenMovesLength_AgainstStockfish_Startpos () =
+[<TestCaseSource("startPosFEN_source")>]
+[<TestCase("rnbqkbnr/ppp1pppp/8/8/3pP3/1P1P4/P1P2PPP/RNBQKBNR b KQkq e3 0 3")>]
+[<TestCase("r2q1rk1/2p1bppp/p1n1bn2/1p2p3/4P3/2P2N2/PPBN1PPP/R1BQR1K1 w - - 1 12")>]
+let TestGenMovesLength_AgainstStockfish_Modular (fen) =
     let board = parseFEN startPosFEN
     
     let game = {Game.init() with Board = board} 
@@ -289,8 +294,9 @@ let TestDetermineFlag_QueensRook_White () =
     Assert.That(result)
     
 [<Test>]
-let TestDetermineFlag_KingsRook_White () =
-    let board = parseFEN startPosFEN
+[<TestCaseSource("startPosFEN_source")>]
+let TestDetermineFlag_KingsRook_White (fen) =
+    let board = parseFEN fen
     
     let game = {Game.init() with Board = board}
     
@@ -305,8 +311,9 @@ let TestDetermineFlag_KingsRook_White () =
     Assert.That(result)
     
 [<Test>]
-let TestDetermineFlag_QueensRook_Black () =
-    let board = parseFEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1"
+[<TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")>]
+let TestDetermineFlag_QueensRook_Black (fen) =
+    let board = parseFEN fen
     
     let game = {Game.init() with Board = board}
     
@@ -321,8 +328,9 @@ let TestDetermineFlag_QueensRook_Black () =
     Assert.That(result)
     
 [<Test>]
-let TestDetermineFlag_KingsRook_Black () =
-    let board = parseFEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1"
+[<TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")>]
+let TestDetermineFlag_KingsRook_Black (fen) =
+    let board = parseFEN fen
     
     let game = {Game.init() with Board = board}
     

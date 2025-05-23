@@ -27,7 +27,6 @@ let colorOfCase c =
     | _ -> Piece.White
     
 
-
 let charToPiece c =
     match c with
     | 'r'
