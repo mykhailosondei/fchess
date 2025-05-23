@@ -1,0 +1,77 @@
+@using fchess.CLI
+@using fchess.Core
+@using fchess.CLI
+@using fchess.Core
+
+@rendermode InteractiveServer
+
+<div class="terminal-view">
+    <div class="terminal-output">
+        @foreach (var line in outputLines)
+        {
+            <div class="output-line">@((MarkupString)line)</div>
+        }
+    </div>
+    <div class="terminal-input-area">
+        <span class="prompt">></span>
+        <input type="text" @bind="currentCommand" @onkeyup="HandleInputKey" placeholder="Enter command..." />
+    </div>
+</div>
+
+@code {
+    private CommandProcessor.CommandProcessor commandProcessor;
+    private List<string> outputLines = new List<string>();
+    private string currentCommand = string.Empty;
+    private Game.Game gameState; // This will be shared or passed if needed
+
+    protected override void OnInitialized()
+    {
+        gameState = Game.init();
+        commandProcessor = new CommandProcessor.CommandProcessor();
+
+        commandProcessor.state = gameState;
+        
+        outputLines.Add("FChess CLI Initialized. Type 'help' for commands."); 
+    }
+
+    private void HandleInputKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            ProcessCurrentCommand();
+        }
+    }
+
+    private void ProcessCurrentCommand()
+    {
+        if (string.IsNullOrWhiteSpace(currentCommand)) return;
+
+        outputLines.Add("<span class=\"command-echo\">> " + currentCommand + "</span>");
+        var result = commandProcessor.ProcessCommand(currentCommand);
+
+        if (result.IsOk)
+        {
+            commandProcessor.state = result.ResultValue;
+            if (commandProcessor.state != null && (currentCommand.Trim() == "d" || currentCommand.Trim().StartsWith("display")))
+            {
+                string boardStr = commandProcessor.state.Board.ToString().Replace("\n", "<br />");
+                outputLines.Add(boardStr);
+            }
+            else if (currentCommand.Trim().StartsWith("moves"))
+            {
+                outputLines.Add("Moves command processed (output depends on CLI strategy).");
+            }
+            else
+            {
+                 outputLines.Add("Command executed successfully.");
+            }
+        }
+        else
+        {
+            outputLines.Add("<span class=\"error-message\">" + result.ErrorValue + "</span>");
+        }
+        
+        currentCommand = string.Empty;
+        StateHasChanged(); // Ensure UI updates
+    }
+} 
